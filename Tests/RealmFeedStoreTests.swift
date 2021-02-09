@@ -4,6 +4,7 @@
 
 import XCTest
 import FeedStoreChallenge
+import RealmSwift
 
 class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	
@@ -18,7 +19,7 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	//  Repeat this process until all tests are passing.
 	//
 	//  ***********************
-	
+		
 	func test_retrieve_deliversEmptyOnEmptyCache() {
 		let sut = makeSUT()
 		
@@ -32,9 +33,9 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	}
 	
 	func test_retrieve_deliversFoundValuesOnNonEmptyCache() {
-		//		let sut = makeSUT()
-		//
-		//		assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on: sut)
+		let sut = makeSUT()
+		
+		assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on: sut)
 	}
 	
 	func test_retrieve_hasNoSideEffectsOnNonEmptyCache() {
@@ -94,9 +95,9 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	// - MARK: Helpers
 	
 	private func makeSUT() -> FeedStore {
-		return RealmFeedStore()
+		let configuration = Realm.Configuration(inMemoryIdentifier: UUID().uuidString)
+		return RealmFeedStore(configuration: configuration)
 	}
-	
 }
 
 //  ***********************
