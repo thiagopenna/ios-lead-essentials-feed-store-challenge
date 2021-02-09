@@ -5,7 +5,7 @@
 import XCTest
 import FeedStoreChallenge
 
-class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
+class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	
 	//  ***********************
 	//
@@ -107,7 +107,7 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 //
 //  ***********************
 
-//extension FeedStoreChallengeTests: FailableRetrieveFeedStoreSpecs {
+//extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 //
 //	func test_retrieve_deliversFailureOnRetrievalError() {
 ////		let sut = makeSUT()
