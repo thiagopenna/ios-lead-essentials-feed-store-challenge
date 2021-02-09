@@ -76,6 +76,6 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-		// TODO: implement deletion
+		completion(nil)
 	}
 }
