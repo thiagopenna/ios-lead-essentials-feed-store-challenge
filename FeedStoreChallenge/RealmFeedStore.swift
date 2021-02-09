@@ -76,6 +76,13 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-		completion(nil)
+		let predicate = NSPredicate(format: "_id = %@", cacheId.uuidString)
+		guard let cache = realm.objects(RealmCache.self).filter(predicate).first else {
+			return completion(nil)
+		}
+		try! realm.write {
+			realm.delete(cache)
+			completion(nil)
+		}
 	}
 }
