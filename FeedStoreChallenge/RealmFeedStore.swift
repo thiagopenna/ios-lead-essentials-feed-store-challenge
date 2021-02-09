@@ -60,7 +60,8 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
-		guard let cache = realm.objects(RealmCache.self).first else {
+		let predicate = NSPredicate(format: "_id = %@", cacheId.uuidString)
+		guard let cache = realm.objects(RealmCache.self).filter(predicate).first else {
 			return completion(.empty)
 		}
 		return completion(.found(feed: cache.local, timestamp: cache.timestamp))
