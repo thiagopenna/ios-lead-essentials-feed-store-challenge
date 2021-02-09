@@ -10,13 +10,19 @@ import Foundation
 import RealmSwift
 
 internal class RealmCache: Object {
-	let feed: List<RealmFeedImage> = List<RealmFeedImage>()
+	@objc dynamic var _id: String!
 	@objc dynamic var timestamp: Date = Date()
+	let feed: List<RealmFeedImage> = List<RealmFeedImage>()
 	
-	internal convenience init(feed: [RealmFeedImage], timestamp: Date) {
+	internal convenience init(_id: String, feed: [RealmFeedImage], timestamp: Date) {
 		self.init()
+		self._id = _id
 		self.feed.append(objectsIn: feed)
 		self.timestamp = timestamp
+	}
+	
+	override class func primaryKey() -> String? {
+		return "_id"
 	}
 	
 	internal var local: [LocalFeedImage] {
@@ -46,9 +52,11 @@ internal class RealmFeedImage: Object {
 public class RealmFeedStore: FeedStore {
 	
 	private var realm: Realm!
+	private var cacheId: UUID
 	
-	public init(configuration: Realm.Configuration) {
+	public init(configuration: Realm.Configuration, cacheId: UUID) {
 		self.realm = try! Realm(configuration: configuration)
+		self.cacheId = cacheId
 	}
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
@@ -60,8 +68,8 @@ public class RealmFeedStore: FeedStore {
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
 		try! realm.write {
-			let cache = RealmCache(feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
-			realm.add(cache)
+			let cache = RealmCache(_id: cacheId.uuidString, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
+			realm.add(cache, update: .modified)
 			completion(nil)
 		}
 	}

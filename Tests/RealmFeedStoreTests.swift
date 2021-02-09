@@ -57,9 +57,9 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	}
 	
 	func test_insert_overridesPreviouslyInsertedCacheValues() {
-		//		let sut = makeSUT()
-		//
-		//		assertThatInsertOverridesPreviouslyInsertedCacheValues(on: sut)
+		let sut = makeSUT()
+		
+		assertThatInsertOverridesPreviouslyInsertedCacheValues(on: sut)
 	}
 	
 	func test_delete_deliversNoErrorOnEmptyCache() {
@@ -95,8 +95,9 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	// - MARK: Helpers
 	
 	private func makeSUT() -> FeedStore {
-		let configuration = Realm.Configuration(inMemoryIdentifier: UUID().uuidString)
-		return RealmFeedStore(configuration: configuration)
+		let cacheId = UUID()
+		let configuration = Realm.Configuration(inMemoryIdentifier: cacheId.uuidString)
+		return RealmFeedStore(configuration: configuration, cacheId: cacheId)
 	}
 }
 
