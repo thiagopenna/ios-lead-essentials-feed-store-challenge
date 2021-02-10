@@ -93,13 +93,15 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	}
 	
 	// - MARK: Helpers
-	private func makeSUT() -> FeedStore {
+	private func makeSUT(file: StaticString = #file, line: UInt = #line) -> FeedStore {
 		let cacheId = UUID()
 		let configuration = Realm.Configuration(inMemoryIdentifier: cacheId.uuidString)
 		
 		let _ = strongReferenceToInMemoryRealm(configuration: configuration)
 		
-		return RealmFeedStore(configuration: configuration, cacheId: cacheId)
+		let sut = RealmFeedStore(configuration: configuration, cacheId: cacheId)
+		trackForMemoryLeaks(sut, file: file, line: line)
+		return sut
 	}
 	
 	/// Opens a Realm so we can hold a strong reference to it for the duration of the tests.

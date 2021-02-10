@@ -18,27 +18,27 @@ public class RealmFeedStore: FeedStore {
 		self.cacheId = cacheId
 	}
 	
-	private func openRealm() throws -> Realm {
-		return try Realm(configuration: self.configuration)
+	private static func openRealm(with configuration: Realm.Configuration) throws -> Realm {
+		return try Realm(configuration: configuration, queue: queue)
 	}
 	
-	private let queue = DispatchQueue(label: "\(RealmFeedStore.self)Queue", qos: .userInitiated)
+	private static let queue = DispatchQueue(label: "\(RealmFeedStore.self)Queue", qos: .userInitiated)
 	
 	private lazy var retrievalPredicate = NSPredicate(format: "_id = %@", cacheId.uuidString)
 	
-	private func retrieveCache(on realm: Realm) -> RealmCache? {
+	private static func retrieveCache(on realm: Realm, with predicate: NSPredicate) -> RealmCache? {
 		let caches = realm.objects(RealmCache.self)
-		let filteredCache = caches.filter(self.retrievalPredicate)
+		let filteredCache = caches.filter(predicate)
 		return filteredCache.first
 	}
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
-		queue.async {
+		RealmFeedStore.queue.async { [configuration, retrievalPredicate] in
 			autoreleasepool {
 				do {
-					let realm = try self.openRealm()
+					let realm = try RealmFeedStore.openRealm(with: configuration)
 					realm.refresh()
-					guard let cache = self.retrieveCache(on: realm) else {
+					guard let cache = RealmFeedStore.retrieveCache(on: realm, with: retrievalPredicate) else {
 						return completion(.empty)
 					}
 					completion(.found(feed: cache.local, timestamp: cache.timestamp))
@@ -51,10 +51,10 @@ public class RealmFeedStore: FeedStore {
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
 		let cache = RealmCache(_id: cacheId.uuidString, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
-		queue.async {
+		RealmFeedStore.queue.async { [configuration] in
 			autoreleasepool {
 				do {
-					let realm = try self.openRealm()
+					let realm = try RealmFeedStore.openRealm(with: configuration)
 					try realm.write {
 						realm.add(cache, update: .modified)
 					}
@@ -67,11 +67,11 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-		queue.async {
+		RealmFeedStore.queue.async { [configuration, retrievalPredicate] in
 			autoreleasepool {
 				do {
-					let realm = try self.openRealm()
-					guard let cache = self.retrieveCache(on: realm) else {
+					let realm = try RealmFeedStore.openRealm(with: configuration)
+					guard let cache = RealmFeedStore.retrieveCache(on: realm, with: retrievalPredicate) else {
 						return completion(nil)
 					}
 					try realm.write {

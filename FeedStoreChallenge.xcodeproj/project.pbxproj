@@ -23,6 +23,7 @@
 		AFD05C0A25D2FF8B00AF26D5 /* RealmFeedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD05C0925D2FF8B00AF26D5 /* RealmFeedStore.swift */; };
 		AFD05C0E25D44C1300AF26D5 /* RealmCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD05C0D25D44C1300AF26D5 /* RealmCache.swift */; };
 		AFD05C1225D44C5A00AF26D5 /* RealmFeedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD05C1125D44C5A00AF26D5 /* RealmFeedImage.swift */; };
+		AFD05C1D25D4705500AF26D5 /* XCTestCase+MemoryLeakTracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD05C1C25D4705500AF26D5 /* XCTestCase+MemoryLeakTracking.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		AFD05C0925D2FF8B00AF26D5 /* RealmFeedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmFeedStore.swift; sourceTree = "<group>"; };
 		AFD05C0D25D44C1300AF26D5 /* RealmCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmCache.swift; sourceTree = "<group>"; };
 		AFD05C1125D44C5A00AF26D5 /* RealmFeedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmFeedImage.swift; sourceTree = "<group>"; };
+		AFD05C1C25D4705500AF26D5 /* XCTestCase+MemoryLeakTracking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+MemoryLeakTracking.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +113,7 @@
 		08CE2B982285BBD100183A1B /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				AFD05C1B25D4703B00AF26D5 /* Helpers */,
 				08CE2BA92285BCE700183A1B /* FeedStoreSpecs */,
 				08CE2BB42285BEF100183A1B /* RealmFeedStoreTests.swift */,
 				084BB13B24FE50A10091C705 /* FeedStoreIntegrationTests.swift */,
@@ -130,6 +133,14 @@
 				084BB13D24FE56830091C705 /* XCTestCase+FeedStoreHelpers.swift */,
 			);
 			path = FeedStoreSpecs;
+			sourceTree = "<group>";
+		};
+		AFD05C1B25D4703B00AF26D5 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				AFD05C1C25D4705500AF26D5 /* XCTestCase+MemoryLeakTracking.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -263,6 +274,7 @@
 			files = (
 				08CE2BB22285BCE700183A1B /* XCTestCase+FailableDeleteFeedStoreSpecs.swift in Sources */,
 				08CE2BB02285BCE700183A1B /* FeedStoreSpecs.swift in Sources */,
+				AFD05C1D25D4705500AF26D5 /* XCTestCase+MemoryLeakTracking.swift in Sources */,
 				084BB13C24FE50A10091C705 /* FeedStoreIntegrationTests.swift in Sources */,
 				08CE2BB12285BCE700183A1B /* XCTestCase+FailableRetrieveFeedStoreSpecs.swift in Sources */,
 				08CE2BAF2285BCE700183A1B /* XCTestCase+FeedStoreSpecs.swift in Sources */,
