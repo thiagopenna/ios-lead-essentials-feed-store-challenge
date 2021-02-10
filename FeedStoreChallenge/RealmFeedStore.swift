@@ -22,10 +22,17 @@ public class RealmFeedStore: FeedStore {
 		return try Realm(configuration: self.configuration)
 	}
 	
+	private lazy var retrievalPredicate = NSPredicate(format: "_id = %@", cacheId.uuidString)
+	
+	private func retrieveCache(on realm: Realm) -> RealmCache? {
+		let caches = realm.objects(RealmCache.self)
+		let filteredCache = caches.filter(self.retrievalPredicate)
+		return filteredCache.first
+	}
+	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
 		let realm = try! self.openRealm()
-		let predicate = NSPredicate(format: "_id = %@", cacheId.uuidString)
-		guard let cache = realm.objects(RealmCache.self).filter(predicate).first else {
+		guard let cache = retrieveCache(on: realm) else {
 			return completion(.empty)
 		}
 		return completion(.found(feed: cache.local, timestamp: cache.timestamp))
@@ -46,8 +53,7 @@ public class RealmFeedStore: FeedStore {
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
 		let realm = try! self.openRealm()
-		let predicate = NSPredicate(format: "_id = %@", cacheId.uuidString)
-		guard let cache = realm.objects(RealmCache.self).filter(predicate).first else {
+		guard let cache = retrieveCache(on: realm) else {
 			return completion(nil)
 		}
 		do {
