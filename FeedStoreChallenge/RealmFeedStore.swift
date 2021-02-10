@@ -10,15 +10,20 @@ import Foundation
 import RealmSwift
 
 public class RealmFeedStore: FeedStore {
-	private var realm: Realm!
+	private let configuration: Realm.Configuration
 	private var cacheId: UUID
 	
 	public init(configuration: Realm.Configuration, cacheId: UUID) {
-		self.realm = try! Realm(configuration: configuration)
+		self.configuration = configuration
 		self.cacheId = cacheId
 	}
 	
+	private func openRealm() throws -> Realm {
+		return try Realm(configuration: self.configuration)
+	}
+	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
+		let realm = try! self.openRealm()
 		let predicate = NSPredicate(format: "_id = %@", cacheId.uuidString)
 		guard let cache = realm.objects(RealmCache.self).filter(predicate).first else {
 			return completion(.empty)
@@ -27,6 +32,7 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
+		let realm = try! self.openRealm()
 		do {
 			try realm.write {
 				let cache = RealmCache(_id: cacheId.uuidString, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
@@ -39,6 +45,7 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
+		let realm = try! self.openRealm()
 		let predicate = NSPredicate(format: "_id = %@", cacheId.uuidString)
 		guard let cache = realm.objects(RealmCache.self).filter(predicate).first else {
 			return completion(nil)
