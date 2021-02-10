@@ -21,6 +21,7 @@
 		AFD05C0425D2FF3000AF26D5 /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = AFD05C0325D2FF3000AF26D5 /* Realm */; };
 		AFD05C0625D2FF3000AF26D5 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = AFD05C0525D2FF3000AF26D5 /* RealmSwift */; };
 		AFD05C0A25D2FF8B00AF26D5 /* RealmFeedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD05C0925D2FF8B00AF26D5 /* RealmFeedStore.swift */; };
+		AFD05C0E25D44C1300AF26D5 /* RealmCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD05C0D25D44C1300AF26D5 /* RealmCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		08CE2BAE2285BCE700183A1B /* XCTestCase+FailableInsertFeedStoreSpecs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTestCase+FailableInsertFeedStoreSpecs.swift"; sourceTree = "<group>"; };
 		08CE2BB42285BEF100183A1B /* RealmFeedStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmFeedStoreTests.swift; sourceTree = "<group>"; };
 		AFD05C0925D2FF8B00AF26D5 /* RealmFeedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmFeedStore.swift; sourceTree = "<group>"; };
+		AFD05C0D25D44C1300AF26D5 /* RealmCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +100,7 @@
 				08CE2BA52285BCB600183A1B /* FeedStore.swift */,
 				08CE2B8F2285BBD100183A1B /* Info.plist */,
 				AFD05C0925D2FF8B00AF26D5 /* RealmFeedStore.swift */,
+				AFD05C0D25D44C1300AF26D5 /* RealmCache.swift */,
 			);
 			path = FeedStoreChallenge;
 			sourceTree = "<group>";
@@ -243,6 +246,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AFD05C0E25D44C1300AF26D5 /* RealmCache.swift in Sources */,
 				08CE2BA62285BCB600183A1B /* FeedStore.swift in Sources */,
 				AFD05C0A25D2FF8B00AF26D5 /* RealmFeedStore.swift in Sources */,
 				08CE2BA82285BCC600183A1B /* LocalFeedImage.swift in Sources */,
