@@ -87,17 +87,28 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	}
 	
 	func test_storeSideEffects_runSerially() {
-		//		let sut = makeSUT()
-		//
-		//		assertThatSideEffectsRunSerially(on: sut)
+		let sut = makeSUT()
+		
+		assertThatSideEffectsRunSerially(on: sut)
 	}
 	
 	// - MARK: Helpers
-	
 	private func makeSUT() -> FeedStore {
 		let cacheId = UUID()
 		let configuration = Realm.Configuration(inMemoryIdentifier: cacheId.uuidString)
+		
+		let _ = strongReferenceToInMemoryRealm(configuration: configuration)
+		
 		return RealmFeedStore(configuration: configuration, cacheId: cacheId)
+	}
+	
+	/// Opens a Realm so we can hold a strong reference to it for the duration of the tests.
+	///
+	/// From Realm Documentation: When all in-memory Realm instances with a particular identifier go out of scope
+	/// with no references, all data in that Realm is deleted. We recommend holding onto a strong reference to any
+	/// in-memory Realms during your app’s lifetime. (This is not necessary for on-disk Realms.)
+	private func strongReferenceToInMemoryRealm(configuration: Realm.Configuration) -> Realm {
+		return try! Realm(configuration: configuration)
 	}
 }
 

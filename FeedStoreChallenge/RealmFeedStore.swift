@@ -22,6 +22,8 @@ public class RealmFeedStore: FeedStore {
 		return try Realm(configuration: self.configuration)
 	}
 	
+	private let queue = DispatchQueue(label: "\(RealmFeedStore.self)Queue", qos: .userInitiated)
+	
 	private lazy var retrievalPredicate = NSPredicate(format: "_id = %@", cacheId.uuidString)
 	
 	private func retrieveCache(on realm: Realm) -> RealmCache? {
@@ -31,42 +33,55 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
-		do {
-			let realm = try self.openRealm()
-			guard let cache = retrieveCache(on: realm) else {
-				return completion(.empty)
+		queue.async {
+			autoreleasepool {
+				do {
+					let realm = try self.openRealm()
+					realm.refresh()
+					guard let cache = self.retrieveCache(on: realm) else {
+						return completion(.empty)
+					}
+					completion(.found(feed: cache.local, timestamp: cache.timestamp))
+				} catch {
+					completion(.failure(error))
+				}
 			}
-			completion(.found(feed: cache.local, timestamp: cache.timestamp))
-		} catch {
-			completion(.failure(error))
 		}
 	}
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-		do {
-			let realm = try self.openRealm()
-			try realm.write {
-				let cache = RealmCache(_id: cacheId.uuidString, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
-				realm.add(cache, update: .modified)
-				completion(nil)
+		let cache = RealmCache(_id: cacheId.uuidString, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
+		queue.async {
+			autoreleasepool {
+				do {
+					let realm = try self.openRealm()
+					try realm.write {
+						realm.add(cache, update: .modified)
+					}
+					completion(nil)
+				} catch {
+					completion(error)
+				}
 			}
-		} catch {
-			completion(error)
 		}
 	}
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-		do {
-			let realm = try self.openRealm()
-			guard let cache = retrieveCache(on: realm) else {
-				return completion(nil)
+		queue.async {
+			autoreleasepool {
+				do {
+					let realm = try self.openRealm()
+					guard let cache = self.retrieveCache(on: realm) else {
+						return completion(nil)
+					}
+					try realm.write {
+						realm.delete(cache)
+					}
+					completion(nil)
+				} catch {
+					completion(error)
+				}
 			}
-			try realm.write {
-				realm.delete(cache)
-				completion(nil)
-			}
-		} catch {
-			completion(error)
 		}
 	}
 }
