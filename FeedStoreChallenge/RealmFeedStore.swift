@@ -10,7 +10,6 @@ import Foundation
 import RealmSwift
 
 public class RealmFeedStore: FeedStore {
-	
 	private var realm: Realm!
 	private var cacheId: UUID
 	
@@ -28,10 +27,14 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-		try! realm.write {
-			let cache = RealmCache(_id: cacheId.uuidString, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
-			realm.add(cache, update: .modified)
-			completion(nil)
+		do {
+			try realm.write {
+				let cache = RealmCache(_id: cacheId.uuidString, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
+				realm.add(cache, update: .modified)
+				completion(nil)
+			}
+		} catch {
+			completion(error)
 		}
 	}
 	
@@ -40,9 +43,13 @@ public class RealmFeedStore: FeedStore {
 		guard let cache = realm.objects(RealmCache.self).filter(predicate).first else {
 			return completion(nil)
 		}
-		try! realm.write {
-			realm.delete(cache)
-			completion(nil)
+		do {
+			try realm.write {
+				realm.delete(cache)
+				completion(nil)
+			}
+		} catch {
+			completion(error)
 		}
 	}
 }
