@@ -31,16 +31,20 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
-		let realm = try! self.openRealm()
-		guard let cache = retrieveCache(on: realm) else {
-			return completion(.empty)
+		do {
+			let realm = try self.openRealm()
+			guard let cache = retrieveCache(on: realm) else {
+				return completion(.empty)
+			}
+			completion(.found(feed: cache.local, timestamp: cache.timestamp))
+		} catch {
+			completion(.failure(error))
 		}
-		return completion(.found(feed: cache.local, timestamp: cache.timestamp))
 	}
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-		let realm = try! self.openRealm()
 		do {
+			let realm = try self.openRealm()
 			try realm.write {
 				let cache = RealmCache(_id: cacheId.uuidString, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
 				realm.add(cache, update: .modified)
@@ -52,11 +56,11 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-		let realm = try! self.openRealm()
-		guard let cache = retrieveCache(on: realm) else {
-			return completion(nil)
-		}
 		do {
+			let realm = try self.openRealm()
+			guard let cache = retrieveCache(on: realm) else {
+				return completion(nil)
+			}
 			try realm.write {
 				realm.delete(cache)
 				completion(nil)
