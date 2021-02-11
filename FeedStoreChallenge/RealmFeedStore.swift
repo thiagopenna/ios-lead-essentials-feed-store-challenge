@@ -11,7 +11,7 @@ import RealmSwift
 
 public class RealmFeedStore: FeedStore {
 	private let configuration: Realm.Configuration
-	private var cacheId: UUID
+	private let cacheId: UUID
 	
 	public init(configuration: Realm.Configuration, cacheId: UUID) {
 		self.configuration = configuration
