@@ -97,7 +97,7 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 		let configuration = Realm.Configuration(inMemoryIdentifier: cacheId.uuidString)
 		
 		if shouldHoldReferenceToRealm {
-			_ = strongReferenceToInMemoryRealm(configuration: configuration)
+			_ = strongReferenceToInMemoryRealm(cacheId: cacheId)
 		}
 		
 		let sut = RealmFeedStore(configuration: configuration, cacheId: cacheId)
@@ -110,7 +110,11 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	/// From Realm Documentation: When all in-memory Realm instances with a particular identifier go out of scope
 	/// with no references, all data in that Realm is deleted. We recommend holding onto a strong reference to any
 	/// in-memory Realms during your app’s lifetime. (This is not necessary for on-disk Realms.)
-	private func strongReferenceToInMemoryRealm(configuration: Realm.Configuration) -> Realm {
+	private func strongReferenceToInMemoryRealm(cacheId: UUID, encrypted: Bool = false) -> Realm {
+		var configuration = Realm.Configuration(inMemoryIdentifier: cacheId.uuidString)
+		if encrypted {
+			configuration.encryptionKey = Data(count: 64)
+		}
 		return try! Realm(configuration: configuration)
 	}
 }
@@ -127,9 +131,7 @@ extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_deliversFailureOnRetrievalError() {
 		let cacheId = UUID()
-		let encryptionKey = Data(count: 64)
-		let configurationWithEncryption = Realm.Configuration(inMemoryIdentifier: cacheId.uuidString, encryptionKey: encryptionKey)
-		let _ = strongReferenceToInMemoryRealm(configuration: configurationWithEncryption)
+		_ = strongReferenceToInMemoryRealm(cacheId: cacheId, encrypted: true)
 		
 		let sut = makeSUT(cacheId: cacheId, shouldHoldReferenceToRealm: false)
 		
