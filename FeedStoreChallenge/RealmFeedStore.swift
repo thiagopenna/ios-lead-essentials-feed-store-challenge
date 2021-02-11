@@ -34,18 +34,24 @@ public class RealmFeedStore: FeedStore {
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
 		RealmFeedStore.queue.async { [configuration, retrievalPredicate] in
-			autoreleasepool {
-				do {
-					let realm = try RealmFeedStore.openRealm(with: configuration)
-					realm.refresh()
-					guard let cache = RealmFeedStore.retrieveCache(on: realm, with: retrievalPredicate) else {
-						return completion(.empty)
-					}
-					completion(.found(feed: cache.local, timestamp: cache.timestamp))
-				} catch {
-					completion(.failure(error))
-				}
+			var retrieveResult: RetrieveCachedFeedResult!
+			autoreleasepool { () -> () in
+				retrieveResult = RealmFeedStore.performRetrieve(with: configuration, and: retrievalPredicate)
 			}
+			completion(retrieveResult)
+		}
+	}
+	
+	private static func performRetrieve(with configuration: Realm.Configuration, and predicate: NSPredicate) -> RetrieveCachedFeedResult {
+		do {
+			let realm = try RealmFeedStore.openRealm(with: configuration)
+			realm.refresh()
+			guard let cache = RealmFeedStore.retrieveCache(on: realm, with: predicate) else {
+				return .empty
+			}
+			return .found(feed: cache.local, timestamp: cache.timestamp)
+		} catch {
+			return .failure(error)
 		}
 	}
 	
