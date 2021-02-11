@@ -72,8 +72,10 @@ class FeedStoreIntegrationTests: XCTestCase {
 	
 	// - MARK: Helpers
 	
-	private func makeSUT() -> FeedStore {
-		return RealmFeedStore(configuration: testSpecificRealmConfiguration, cacheId: testSpecificCacheID)
+	private func makeSUT(file: StaticString = #file, line: UInt = #line) -> FeedStore {
+		let sut = RealmFeedStore(configuration: testSpecificRealmConfiguration, cacheId: testSpecificCacheID)
+		trackForMemoryLeaks(sut, file: file, line: line)
+		return sut
 	}
 	
 	
