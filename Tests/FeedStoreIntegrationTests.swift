@@ -34,14 +34,14 @@ class FeedStoreIntegrationTests: XCTestCase {
 	}
 	
 	func test_retrieve_deliversFeedInsertedOnAnotherInstance() {
-		//        let storeToInsert = makeSUT()
-		//        let storeToLoad = makeSUT()
-		//        let feed = uniqueImageFeed()
-		//        let timestamp = Date()
-		//
-		//        insert((feed, timestamp), to: storeToInsert)
-		//
-		//        expect(storeToLoad, toRetrieve: .found(feed: feed, timestamp: timestamp))
+		let storeToInsert = makeSUT()
+		let storeToLoad = makeSUT()
+		let feed = uniqueImageFeed()
+		let timestamp = Date()
+		
+		insert((feed, timestamp), to: storeToInsert)
+		
+		expect(storeToLoad, toRetrieve: .found(feed: feed, timestamp: timestamp))
 	}
 	
 	func test_insert_overridesFeedInsertedOnAnotherInstance() {
@@ -73,15 +73,31 @@ class FeedStoreIntegrationTests: XCTestCase {
 	// - MARK: Helpers
 	
 	private func makeSUT() -> FeedStore {
-		return RealmFeedStore(configuration: Realm.Configuration(), cacheId: UUID())
+		return RealmFeedStore(configuration: testSpecificRealmConfiguration, cacheId: testSpecificCacheID)
 	}
 	
+	
 	private func setupEmptyStoreState() {
-		
+		deleteStoreArtifacts()
 	}
 	
 	private func undoStoreSideEffects() {
-		
+		deleteStoreArtifacts()
 	}
+	
+	private func deleteStoreArtifacts() {
+		_ = try? Realm.deleteFiles(for: testSpecificRealmConfiguration)
+	}
+	
+	private lazy var testSpecificRealmConfiguration = Realm.Configuration(fileURL: testSpecificRealmStoreURL)
+	
+	private let testSpecificRealmStoreURL: URL = {
+		let defaultRealmURL = Realm.Configuration.defaultConfiguration.fileURL
+		let defaultRealmParentDirectoryURL = defaultRealmURL?.deletingLastPathComponent()
+		let testSpecificRealmURL = defaultRealmParentDirectoryURL?.appendingPathComponent("\(FeedStoreIntegrationTests.self).realm")
+		return testSpecificRealmURL!
+	}()
+	
+	private let testSpecificCacheID = UUID(uuidString: "00000000-0000-4000-0000-000000000000")!
 	
 }
