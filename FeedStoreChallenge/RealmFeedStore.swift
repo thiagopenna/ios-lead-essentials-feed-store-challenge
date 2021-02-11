@@ -33,13 +33,9 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func retrieve(completion: @escaping RetrievalCompletion) {
-		RealmFeedStore.queue.async { [configuration, retrievalPredicate] in
-			var retrieveResult: RetrieveCachedFeedResult!
-			autoreleasepool { () -> () in
-				retrieveResult = RealmFeedStore.performRetrieve(with: configuration, and: retrievalPredicate)
-			}
-			completion(retrieveResult)
-		}
+		RealmFeedStore.performRealmOperation ({ [configuration, retrievalPredicate] in
+			RealmFeedStore.performRetrieve(with: configuration, and: retrievalPredicate)
+		}, completion: completion)
 	}
 	
 	private static func performRetrieve(with configuration: Realm.Configuration, and predicate: NSPredicate) -> RetrieveCachedFeedResult {
@@ -57,13 +53,9 @@ public class RealmFeedStore: FeedStore {
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
 		let cache = RealmCache(_id: cacheId.uuidString, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
-		RealmFeedStore.queue.async { [configuration] in
-			var insertionResult: Error?
-			autoreleasepool {
-				insertionResult = RealmFeedStore.performInsert(of: cache, with: configuration)
-			}
-			completion(insertionResult)
-		}
+		RealmFeedStore.performRealmOperation({ [configuration]in
+			RealmFeedStore.performInsert(of: cache, with: configuration)
+		}, completion: completion)
 	}
 	
 	private static func performInsert(of cache: RealmCache, with configuration: Realm.Configuration) -> Error? {
@@ -79,13 +71,9 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-		RealmFeedStore.queue.async { [configuration, retrievalPredicate] in
-			var deletionResult: Error?
-			autoreleasepool {
-				deletionResult = RealmFeedStore.performDelete(with: configuration, and: retrievalPredicate)
-			}
-			completion(deletionResult)
-		}
+		RealmFeedStore.performRealmOperation ({ [configuration, retrievalPredicate] in
+			RealmFeedStore.performDelete(with: configuration, and: retrievalPredicate)
+		}, completion: completion)
 	}
 	
 	private static func performDelete(with configuration: Realm.Configuration, and predicate: NSPredicate) -> Error? {
@@ -100,6 +88,24 @@ public class RealmFeedStore: FeedStore {
 			return nil
 		} catch {
 			return error
+		}
+	}
+	
+	/// Performs the block passed inside an autoreleasepool, from the correct thread.
+	///
+	/// From [Realm documentation](https://docs.mongodb.com/realm-legacy/docs/swift/latest/#threading):
+	/// Realm read transaction lifetimes are tied to the memory lifetime of Realm instances. Avoid “pinning” old Realm transactions by
+	/// using auto-refreshing Realms and wrapping all use of Realm APIs from background threads in **explicit autorelease pools**.
+	///
+	/// - parameter blockToPerform: The operation to be performed
+	/// - parameter completion: The completion block to be executed with the blockToPerform result
+	private static func performRealmOperation<ResultType>(_ blockToPerform: @escaping () -> ResultType, completion: @escaping (ResultType) -> Void) {
+		RealmFeedStore.queue.async {
+			var result: ResultType!
+			autoreleasepool {
+				result = blockToPerform()
+			}
+			completion(result)
 		}
 	}
 }
