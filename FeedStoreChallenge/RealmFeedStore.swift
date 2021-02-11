@@ -45,7 +45,8 @@ public class RealmFeedStore: FeedStore {
 			guard let cache = RealmFeedStore.retrieveCache(on: realm, with: predicate) else {
 				return .empty
 			}
-			return .found(feed: cache.local, timestamp: cache.timestamp)
+			let localFeed = try cache.toLocal()
+			return .found(feed: localFeed, timestamp: cache.timestamp)
 		} catch {
 			return .failure(error)
 		}

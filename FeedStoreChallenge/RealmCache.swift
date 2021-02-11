@@ -25,7 +25,7 @@ internal class RealmCache: Object {
 		return "_id"
 	}
 	
-	internal var local: [LocalFeedImage] {
-		return feed.map { $0.local }
+	func toLocal() throws -> [LocalFeedImage] {
+		return try feed.map { try $0.toLocal() }
 	}
 }

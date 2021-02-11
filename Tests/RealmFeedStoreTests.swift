@@ -3,7 +3,7 @@
 //
 
 import XCTest
-import FeedStoreChallenge
+@testable import FeedStoreChallenge
 import RealmSwift
 
 class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
@@ -114,12 +114,25 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 		return try! Realm(configuration: makeConfiguration(with: cacheId, encrypted: encrypted))
 	}
 	
-	private func makeConfiguration(with cacheId: UUID, encrypted: Bool) -> Realm.Configuration {
+	private func makeConfiguration(with cacheId: UUID, encrypted: Bool = false) -> Realm.Configuration {
 		var configuration = Realm.Configuration(inMemoryIdentifier: cacheId.uuidString)
 		if encrypted {
 			configuration.encryptionKey = Data(count: 64)
 		}
 		return configuration
+	}
+	
+	private func cacheWithInvalidImage(withId cacheId: UUID) -> RealmCache {
+		let invalidImage = RealmFeedImage(value: ["_id": "invalidUUID", "desc": nil, "location": nil, "url": "invalidURL"])
+		return RealmCache(value: ["_id": cacheId.uuidString, "feed": [invalidImage], "timestamp": Date()])
+	}
+	
+	private func insertCacheWithInvalidImageIntoRealm(withCacheId cacheId: UUID) {
+		let configuration = makeConfiguration(with: cacheId)
+		let realmInstance = try! Realm(configuration: configuration)
+		try! realmInstance.write {
+			realmInstance.add(cacheWithInvalidImage(withId: cacheId))
+		}
 	}
 }
 
@@ -151,6 +164,14 @@ extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
 	}
 
+	func test_retrieve_deliversFailureOnInvalidObject() {
+		let cacheId = UUID()
+		let sut = makeSUT(cacheId: cacheId)
+		
+		insertCacheWithInvalidImageIntoRealm(withCacheId: cacheId)
+		
+		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
+	}
 }
 
 extension RealmFeedStoreTests: FailableInsertFeedStoreSpecs {

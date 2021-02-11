@@ -23,7 +23,10 @@ internal class RealmFeedImage: Object {
 		self.url = image.url.absoluteString
 	}
 		
-	internal var local: LocalFeedImage {
-		return LocalFeedImage(id: UUID(uuidString: _id)!, description: desc, location: location, url: URL(string: url)!)
+	internal func toLocal() throws -> LocalFeedImage {
+		guard let id = UUID(uuidString: _id), let url = URL(string: url) else {
+			throw Realm.Error(.fail)
+		}
+		return LocalFeedImage(id: id, description: desc, location: location, url: url)
 	}
 }
