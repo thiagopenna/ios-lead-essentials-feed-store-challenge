@@ -187,9 +187,13 @@ extension RealmFeedStoreTests: FailableDeleteFeedStoreSpecs {
 	}
 
 	func test_delete_hasNoSideEffectsOnDeletionError() {
-//		let sut = makeSUT()
-//
-//		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
+		let cacheId = UUID()
+		let sut = makeSUT(cacheId: cacheId, encrypted: true)
+		
+		let nonEncryptedSUT = makeSUT(cacheId: cacheId, shouldHoldReferenceToRealm: false)
+		assertThatDeleteDeliversErrorOnDeletionError(on: nonEncryptedSUT)
+		
+		expect(sut, toRetrieve: .empty, file: #filePath, line: #line)
 	}
 
 }
