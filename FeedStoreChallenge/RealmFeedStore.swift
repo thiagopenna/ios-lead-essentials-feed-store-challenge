@@ -58,17 +58,23 @@ public class RealmFeedStore: FeedStore {
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
 		let cache = RealmCache(_id: cacheId.uuidString, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
 		RealmFeedStore.queue.async { [configuration] in
+			var insertionResult: Error?
 			autoreleasepool {
-				do {
-					let realm = try RealmFeedStore.openRealm(with: configuration)
-					try realm.write {
-						realm.add(cache, update: .modified)
-					}
-					completion(nil)
-				} catch {
-					completion(error)
-				}
+				insertionResult = RealmFeedStore.performInsert(of: cache, with: configuration)
 			}
+			completion(insertionResult)
+		}
+	}
+	
+	private static func performInsert(of cache: RealmCache, with configuration: Realm.Configuration) -> Error? {
+		do {
+			let realm = try RealmFeedStore.openRealm(with: configuration)
+			try realm.write {
+				realm.add(cache, update: .modified)
+			}
+			return nil
+		} catch {
+			return error
 		}
 	}
 	
