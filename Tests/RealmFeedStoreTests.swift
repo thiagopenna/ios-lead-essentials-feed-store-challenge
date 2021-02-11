@@ -93,11 +93,12 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	}
 	
 	// - MARK: Helpers
-	private func makeSUT(file: StaticString = #file, line: UInt = #line) -> FeedStore {
-		let cacheId = UUID()
+	private func makeSUT(cacheId: UUID = UUID(), shouldHoldReferenceToRealm: Bool = true, file: StaticString = #file, line: UInt = #line) -> FeedStore {
 		let configuration = Realm.Configuration(inMemoryIdentifier: cacheId.uuidString)
 		
-		let _ = strongReferenceToInMemoryRealm(configuration: configuration)
+		if shouldHoldReferenceToRealm {
+			_ = strongReferenceToInMemoryRealm(configuration: configuration)
+		}
 		
 		let sut = RealmFeedStore(configuration: configuration, cacheId: cacheId)
 		trackForMemoryLeaks(sut, file: file, line: line)
@@ -122,21 +123,26 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 //
 //  ***********************
 
-//extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
+extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
+
+	func test_retrieve_deliversFailureOnRetrievalError() {
+		let cacheId = UUID()
+		let encryptionKey = Data(count: 64)
+		let configurationWithEncryption = Realm.Configuration(inMemoryIdentifier: cacheId.uuidString, encryptionKey: encryptionKey)
+		let _ = strongReferenceToInMemoryRealm(configuration: configurationWithEncryption)
+		
+		let sut = makeSUT(cacheId: cacheId, shouldHoldReferenceToRealm: false)
+		
+		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
+	}
+
+	func test_retrieve_hasNoSideEffectsOnFailure() {
+//		let sut = makeSUT()
 //
-//	func test_retrieve_deliversFailureOnRetrievalError() {
-////		let sut = makeSUT()
-////
-////		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
-//	}
-//
-//	func test_retrieve_hasNoSideEffectsOnFailure() {
-////		let sut = makeSUT()
-////
-////		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
-//	}
-//
-//}
+//		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
+	}
+
+}
 
 //extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
 //
