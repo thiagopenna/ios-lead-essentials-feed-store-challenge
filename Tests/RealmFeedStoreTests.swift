@@ -149,21 +149,24 @@ extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 
 }
 
-//extension FeedStoreChallengeTests: FailableInsertFeedStoreSpecs {
+extension RealmFeedStoreTests: FailableInsertFeedStoreSpecs {
+
+	func test_insert_deliversErrorOnInsertionError() {
+		let cacheId = UUID()
+		_ = strongReferenceToInMemoryRealm(cacheId: cacheId, encrypted: true)
+		
+		let sut = makeSUT(cacheId: cacheId, shouldHoldReferenceToRealm: false)
+
+		assertThatInsertDeliversErrorOnInsertionError(on: sut)
+	}
+
+	func test_insert_hasNoSideEffectsOnInsertionError() {
+//		let sut = makeSUT()
 //
-//	func test_insert_deliversErrorOnInsertionError() {
-////		let sut = makeSUT()
-////
-////		assertThatInsertDeliversErrorOnInsertionError(on: sut)
-//	}
-//
-//	func test_insert_hasNoSideEffectsOnInsertionError() {
-////		let sut = makeSUT()
-////
-////		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
-//	}
-//
-//}
+//		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
+	}
+
+}
 
 //extension FeedStoreChallengeTests: FailableDeleteFeedStoreSpecs {
 //
