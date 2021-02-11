@@ -93,7 +93,7 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	}
 	
 	// - MARK: Helpers
-	private func makeSUT(cacheId: UUID = UUID(), shouldHoldReferenceToRealm: Bool = true, encrypted: Bool = false, file: StaticString = #file, line: UInt = #line) -> FeedStore {
+	private func makeSUT(cacheId: String = UUID().uuidString, shouldHoldReferenceToRealm: Bool = true, encrypted: Bool = false, file: StaticString = #file, line: UInt = #line) -> FeedStore {
 		let configuration = makeConfiguration(with: cacheId, encrypted: encrypted)
 		
 		if shouldHoldReferenceToRealm {
@@ -110,24 +110,24 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	/// From Realm Documentation: When all in-memory Realm instances with a particular identifier go out of scope
 	/// with no references, all data in that Realm is deleted. We recommend holding onto a strong reference to any
 	/// in-memory Realms during your app’s lifetime. (This is not necessary for on-disk Realms.)
-	private func strongReferenceToInMemoryRealm(cacheId: UUID, encrypted: Bool = false) -> Realm {
+	private func strongReferenceToInMemoryRealm(cacheId: String, encrypted: Bool = false) -> Realm {
 		return try! Realm(configuration: makeConfiguration(with: cacheId, encrypted: encrypted))
 	}
 	
-	private func makeConfiguration(with cacheId: UUID, encrypted: Bool = false) -> Realm.Configuration {
-		var configuration = Realm.Configuration(inMemoryIdentifier: cacheId.uuidString)
+	private func makeConfiguration(with cacheId: String, encrypted: Bool = false) -> Realm.Configuration {
+		var configuration = Realm.Configuration(inMemoryIdentifier: cacheId)
 		if encrypted {
 			configuration.encryptionKey = Data(count: 64)
 		}
 		return configuration
 	}
 	
-	private func cacheWithInvalidImage(withId cacheId: UUID) -> RealmCache {
+	private func cacheWithInvalidImage(withId cacheId: String) -> RealmCache {
 		let invalidImage = RealmFeedImage(value: ["_id": "invalidUUID", "desc": nil, "location": nil, "url": "invalidURL"])
-		return RealmCache(value: ["_id": cacheId.uuidString, "feed": [invalidImage], "timestamp": Date()])
+		return RealmCache(value: ["_id": cacheId, "feed": [invalidImage], "timestamp": Date()])
 	}
 	
-	private func insertCacheWithInvalidImageIntoRealm(withCacheId cacheId: UUID) {
+	private func insertCacheWithInvalidImageIntoRealm(withCacheId cacheId: String) {
 		let configuration = makeConfiguration(with: cacheId)
 		let realmInstance = try! Realm(configuration: configuration)
 		try! realmInstance.write {
@@ -147,7 +147,7 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_deliversFailureOnRetrievalError() {
-		let cacheId = UUID()
+		let cacheId = UUID().uuidString
 		_ = strongReferenceToInMemoryRealm(cacheId: cacheId, encrypted: true)
 		
 		let sut = makeSUT(cacheId: cacheId, shouldHoldReferenceToRealm: false)
@@ -156,7 +156,7 @@ extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 	}
 
 	func test_retrieve_hasNoSideEffectsOnFailure() {
-		let cacheId = UUID()
+		let cacheId = UUID().uuidString
 		_ = strongReferenceToInMemoryRealm(cacheId: cacheId, encrypted: true)
 		
 		let sut = makeSUT(cacheId: cacheId, shouldHoldReferenceToRealm: false)
@@ -165,7 +165,7 @@ extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 	}
 
 	func test_retrieve_deliversFailureOnInvalidObject() {
-		let cacheId = UUID()
+		let cacheId = UUID().uuidString
 		let sut = makeSUT(cacheId: cacheId)
 		
 		insertCacheWithInvalidImageIntoRealm(withCacheId: cacheId)
@@ -177,7 +177,7 @@ extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 extension RealmFeedStoreTests: FailableInsertFeedStoreSpecs {
 
 	func test_insert_deliversErrorOnInsertionError() {
-		let cacheId = UUID()
+		let cacheId = UUID().uuidString
 		_ = strongReferenceToInMemoryRealm(cacheId: cacheId, encrypted: true)
 		
 		let sut = makeSUT(cacheId: cacheId, shouldHoldReferenceToRealm: false)
@@ -186,7 +186,7 @@ extension RealmFeedStoreTests: FailableInsertFeedStoreSpecs {
 	}
 
 	func test_insert_hasNoSideEffectsOnInsertionError() {
-		let cacheId = UUID()
+		let cacheId = UUID().uuidString
 		let sut = makeSUT(cacheId: cacheId, encrypted: true)
 		
 		let nonEncryptedSUT = makeSUT(cacheId: cacheId, shouldHoldReferenceToRealm: false)
@@ -199,7 +199,7 @@ extension RealmFeedStoreTests: FailableInsertFeedStoreSpecs {
 extension RealmFeedStoreTests: FailableDeleteFeedStoreSpecs {
 
 	func test_delete_deliversErrorOnDeletionError() {
-		let cacheId = UUID()
+		let cacheId = UUID().uuidString
 		_ = strongReferenceToInMemoryRealm(cacheId: cacheId, encrypted: true)
 		
 		let sut = makeSUT(cacheId: cacheId, shouldHoldReferenceToRealm: false)
@@ -208,7 +208,7 @@ extension RealmFeedStoreTests: FailableDeleteFeedStoreSpecs {
 	}
 
 	func test_delete_hasNoSideEffectsOnDeletionError() {
-		let cacheId = UUID()
+		let cacheId = UUID().uuidString
 		let sut = makeSUT(cacheId: cacheId, encrypted: true)
 		
 		let nonEncryptedSUT = makeSUT(cacheId: cacheId, shouldHoldReferenceToRealm: false)

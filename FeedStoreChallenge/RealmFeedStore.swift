@@ -11,9 +11,9 @@ import RealmSwift
 
 public class RealmFeedStore: FeedStore {
 	private let configuration: Realm.Configuration
-	private let cacheId: UUID
+	private let cacheId: String
 	
-	public init(configuration: Realm.Configuration, cacheId: UUID) {
+	public init(configuration: Realm.Configuration, cacheId: String) {
 		self.configuration = configuration
 		self.cacheId = cacheId
 	}
@@ -24,7 +24,7 @@ public class RealmFeedStore: FeedStore {
 	
 	private static let queue = DispatchQueue(label: "\(RealmFeedStore.self)Queue", qos: .userInitiated)
 	
-	private lazy var retrievalPredicate = NSPredicate(format: "_id = %@", cacheId.uuidString)
+	private lazy var retrievalPredicate = NSPredicate(format: "_id = %@", cacheId)
 	
 	private static func retrieveCache(on realm: Realm, with predicate: NSPredicate) -> RealmCache? {
 		let caches = realm.objects(RealmCache.self)
@@ -53,7 +53,7 @@ public class RealmFeedStore: FeedStore {
 	}
 	
 	public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-		let cache = RealmCache(_id: cacheId.uuidString, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
+		let cache = RealmCache(_id: cacheId, feed: feed.map(RealmFeedImage.init(withLocalImage:)), timestamp: timestamp)
 		RealmFeedStore.performRealmOperation({ [configuration]in
 			RealmFeedStore.performInsert(of: cache, with: configuration)
 		}, completion: completion)
