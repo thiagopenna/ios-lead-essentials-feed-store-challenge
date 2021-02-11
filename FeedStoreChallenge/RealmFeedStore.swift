@@ -80,20 +80,26 @@ public class RealmFeedStore: FeedStore {
 	
 	public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
 		RealmFeedStore.queue.async { [configuration, retrievalPredicate] in
+			var deletionResult: Error?
 			autoreleasepool {
-				do {
-					let realm = try RealmFeedStore.openRealm(with: configuration)
-					guard let cache = RealmFeedStore.retrieveCache(on: realm, with: retrievalPredicate) else {
-						return completion(nil)
-					}
-					try realm.write {
-						realm.delete(cache)
-					}
-					completion(nil)
-				} catch {
-					completion(error)
-				}
+				deletionResult = RealmFeedStore.performDelete(with: configuration, and: retrievalPredicate)
 			}
+			completion(deletionResult)
+		}
+	}
+	
+	private static func performDelete(with configuration: Realm.Configuration, and predicate: NSPredicate) -> Error? {
+		do {
+			let realm = try RealmFeedStore.openRealm(with: configuration)
+			guard let cache = RealmFeedStore.retrieveCache(on: realm, with: predicate) else {
+				return nil
+			}
+			try realm.write {
+				realm.delete(cache)
+			}
+			return nil
+		} catch {
+			return error
 		}
 	}
 }
