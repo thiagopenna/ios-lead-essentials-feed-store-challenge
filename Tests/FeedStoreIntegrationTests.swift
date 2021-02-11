@@ -86,7 +86,7 @@ class FeedStoreIntegrationTests: XCTestCase {
 	}
 	
 	private func deleteStoreArtifacts() {
-		_ = try? Realm.deleteFiles(for: testSpecificRealmConfiguration)
+		_ = try! Realm.deleteFiles(for: testSpecificRealmConfiguration)
 	}
 	
 	private lazy var testSpecificRealmConfiguration = Realm.Configuration(fileURL: testSpecificRealmStoreURL)
