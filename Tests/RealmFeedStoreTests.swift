@@ -139,9 +139,12 @@ extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 	}
 
 	func test_retrieve_hasNoSideEffectsOnFailure() {
-//		let sut = makeSUT()
-//
-//		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
+		let cacheId = UUID()
+		_ = strongReferenceToInMemoryRealm(cacheId: cacheId, encrypted: true)
+		
+		let sut = makeSUT(cacheId: cacheId, shouldHoldReferenceToRealm: false)
+
+		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
 	}
 
 }
