@@ -10,10 +10,10 @@ import Foundation
 import RealmSwift
 
 internal class RealmFeedImage: Object {
-	@objc dynamic var _id: String!
+	@objc dynamic var _id: String = ""
 	@objc dynamic var desc: String?
 	@objc dynamic var location: String?
-	@objc dynamic var url: String!
+	@objc dynamic var url: String = ""
 		
 	internal convenience init(withLocalImage image: LocalFeedImage) {
 		self.init()
