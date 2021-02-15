@@ -93,13 +93,8 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	}
 	
 	// - MARK: Helpers
-	private func makeSUT(shouldHoldReferenceToRealm: Bool = true, encrypted: Bool = false, file: StaticString = #file, line: UInt = #line) -> FeedStore {
-		print(testSpecificInMemoryIdentifier)
+	private func makeSUT(encrypted: Bool = false, file: StaticString = #file, line: UInt = #line) -> FeedStore {
 		let configuration = makeConfiguration(encrypted: encrypted)
-		
-		if shouldHoldReferenceToRealm {
-			_ = strongReferenceToInMemoryRealm(encrypted: encrypted)
-		}
 		
 		let sut = RealmFeedStore(configuration: configuration)
 		trackForMemoryLeaks(sut, file: file, line: line)
@@ -114,7 +109,20 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	/// with no references, all data in that Realm is deleted. We recommend holding onto a strong reference to any
 	/// in-memory Realms during your app’s lifetime. (This is not necessary for on-disk Realms.)
 	private func strongReferenceToInMemoryRealm(encrypted: Bool = false) -> Realm {
-		return try! Realm(configuration: makeConfiguration(encrypted: encrypted))
+		var realm: Realm?
+		autoreleasepool {
+			realm = try! Realm(configuration: makeConfiguration(encrypted: encrypted))
+		}
+		return realm!
+	}
+	
+	@discardableResult
+	private func createInMemoryEncryptedRealmForTestDuration() -> Realm? {
+		var encryptedRealm: Realm? = strongReferenceToInMemoryRealm(encrypted: true)
+		addTeardownBlock {
+			encryptedRealm = nil
+		}
+		return encryptedRealm
 	}
 	
 	private func makeConfiguration(encrypted: Bool = false) -> Realm.Configuration {
@@ -149,15 +157,15 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 
 	func test_retrieve_deliversFailureOnRetrievalError() {
-		_ = strongReferenceToInMemoryRealm(encrypted: true)
-		let sut = makeSUT(shouldHoldReferenceToRealm: false)
+		createInMemoryEncryptedRealmForTestDuration()
+		let sut = makeSUT()
 		
 		assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
 	}
 
 	func test_retrieve_hasNoSideEffectsOnFailure() {
-		_ = strongReferenceToInMemoryRealm(encrypted: true)
-		let sut = makeSUT(shouldHoldReferenceToRealm: false)
+		createInMemoryEncryptedRealmForTestDuration()
+		let sut = makeSUT()
 
 		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
 	}
@@ -174,38 +182,39 @@ extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 extension RealmFeedStoreTests: FailableInsertFeedStoreSpecs {
 
 	func test_insert_deliversErrorOnInsertionError() {
-		_ = strongReferenceToInMemoryRealm(encrypted: true)
-		let sut = makeSUT(shouldHoldReferenceToRealm: false)
+		createInMemoryEncryptedRealmForTestDuration()
+		let sut = makeSUT()
 
 		assertThatInsertDeliversErrorOnInsertionError(on: sut)
 	}
 
 	func test_insert_hasNoSideEffectsOnInsertionError() {
-		let sut = makeSUT(encrypted: true)
-		
-		let nonEncryptedSUT = makeSUT(shouldHoldReferenceToRealm: false)
+		createInMemoryEncryptedRealmForTestDuration()
+		let nonEncryptedSUT = makeSUT()
+
 		assertThatInsertDeliversErrorOnInsertionError(on: nonEncryptedSUT)
-		
-		expect(sut, toRetrieve: .empty, file: #filePath, line: #line)
+
+		let sut = makeSUT(encrypted: true)
+		expect(sut, toRetrieve: .empty)
 	}
 }
 
 extension RealmFeedStoreTests: FailableDeleteFeedStoreSpecs {
 
 	func test_delete_deliversErrorOnDeletionError() {
-		_ = strongReferenceToInMemoryRealm(encrypted: true)
-		let sut = makeSUT(shouldHoldReferenceToRealm: false)
+		createInMemoryEncryptedRealmForTestDuration()
+		let sut = makeSUT()
 
 		assertThatDeleteDeliversErrorOnDeletionError(on: sut)
 	}
 
 	func test_delete_hasNoSideEffectsOnDeletionError() {
-		let sut = makeSUT(encrypted: true)
-		
-		let nonEncryptedSUT = makeSUT(shouldHoldReferenceToRealm: false)
-		assertThatDeleteDeliversErrorOnDeletionError(on: nonEncryptedSUT)
-		
-		expect(sut, toRetrieve: .empty, file: #filePath, line: #line)
-	}
+		createInMemoryEncryptedRealmForTestDuration()
+		let nonEncryptedSUT = makeSUT()
 
+		assertThatDeleteDeliversErrorOnDeletionError(on: nonEncryptedSUT)
+
+		let sut = makeSUT(encrypted: true)
+		expect(sut, toRetrieve: .empty)
+	}
 }
