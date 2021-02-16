@@ -100,6 +100,4 @@ class FeedStoreIntegrationTests: XCTestCase {
 		return testSpecificRealmURL!
 	}()
 	
-	private let testSpecificCacheID = "\(FeedStoreIntegrationTests.self)CacheID"
-	
 }
