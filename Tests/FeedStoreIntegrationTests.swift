@@ -91,13 +91,14 @@ class FeedStoreIntegrationTests: XCTestCase {
 		_ = try! Realm.deleteFiles(for: testSpecificRealmConfiguration)
 	}
 	
-	private lazy var testSpecificRealmConfiguration = Realm.Configuration(fileURL: testSpecificRealmStoreURL)
+	private var testSpecificRealmConfiguration: Realm.Configuration {
+		Realm.Configuration(fileURL: testSpecificRealmStoreURL)
+	}
 	
-	private let testSpecificRealmStoreURL: URL = {
+	private var testSpecificRealmStoreURL: URL {
 		let defaultRealmURL = Realm.Configuration.defaultConfiguration.fileURL
 		let defaultRealmParentDirectoryURL = defaultRealmURL?.deletingLastPathComponent()
 		let testSpecificRealmURL = defaultRealmParentDirectoryURL?.appendingPathComponent("\(FeedStoreIntegrationTests.self).realm")
 		return testSpecificRealmURL!
-	}()
-	
+	}
 }

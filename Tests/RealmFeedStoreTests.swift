@@ -100,9 +100,13 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 		return sut
 	}
 		
-	private static let testSpecificInMemoryIdentifier: String = { "\(type(of: self)).realm" }()
+	private static var testSpecificInMemoryIdentifier: String {
+		"\(type(of: self)).realm"
+	}
 	
-	private static let testSpecificRealmConfiguration: Realm.Configuration = { Realm.Configuration(inMemoryIdentifier: RealmFeedStoreTests.testSpecificInMemoryIdentifier) }()
+	private static var testSpecificRealmConfiguration: Realm.Configuration {
+		Realm.Configuration(inMemoryIdentifier: RealmFeedStoreTests.testSpecificInMemoryIdentifier)
+	}
 	
 	private func cacheWithInvalidImage() -> RealmCache {
 		let invalidImage = RealmFeedImage(value: ["_id": "invalidUUID", "desc": nil, "location": nil, "url": "invalidURL"])
