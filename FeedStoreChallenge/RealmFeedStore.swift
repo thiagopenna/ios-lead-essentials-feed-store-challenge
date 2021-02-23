@@ -10,7 +10,7 @@ import Foundation
 import RealmSwift
 
 public class RealmFeedStore: FeedStore {
-	private var realm: Realm
+	private let realm: Realm
 	
 	public init(configuration: Realm.Configuration) throws {
 		self.realm = try RealmFeedStore.createRealmInstance(with: configuration)
