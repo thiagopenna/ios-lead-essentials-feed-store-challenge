@@ -5,6 +5,7 @@
 import XCTest
 @testable import FeedStoreChallenge
 import RealmSwift
+import Realm
 
 class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 	
@@ -121,6 +122,55 @@ class RealmFeedStoreTests: XCTestCase, FeedStoreSpecs {
 			realmInstance.add(cacheWithInvalidImage())
 		}
 	}
+	
+	private func activateRealmTransactionFailureForTestDuration() {
+		let swizzler = makeSwizzlerForFailingRealmTransaction()
+		addTeardownBlock {
+			withExtendedLifetime(swizzler) { }
+		}
+	}
+	
+	private func makeSwizzlerForFailingRealmTransaction() -> Swizzler {
+		return try! Swizzler(firstClass: RLMRealm.self,
+							 firstSelector: #selector(RLMRealm.commitWriteTransactionWithoutNotifying(_:)),
+							 secondClass: FailingTransactionsRLMRealm.self,
+							 secondSelector: #selector(FailingTransactionsRLMRealm.cancelWriteTransactionAndThrowAnError(_:)))
+	}
+	
+	private class FailingTransactionsRLMRealm: RLMRealm {
+		@objc func cancelWriteTransactionAndThrowAnError(_ tokens: [NotificationToken]) throws {
+			cancelWriteTransaction()
+			throw Realm.Error(.fail)
+		}
+	}
+	
+	private class Swizzler {
+		private var firstMethod: Method
+		private var secondMethod: Method
+		
+		init(firstClass: AnyClass, firstSelector: Selector, secondClass: AnyClass, secondSelector: Selector) throws {
+			guard let firstMethod = class_getInstanceMethod(firstClass, firstSelector),
+				  let secondMethod = class_getInstanceMethod(secondClass, secondSelector) else {
+				throw Error.methodNotFound
+			}
+			self.firstMethod = firstMethod
+			self.secondMethod = secondMethod
+			swizzle()
+		}
+		
+		deinit {
+			swizzle()
+		}
+		
+		private func swizzle() {
+			method_exchangeImplementations(firstMethod, secondMethod)
+		}
+		
+		private enum Error: Swift.Error {
+			case methodNotFound
+		}
+	}
+	
 }
 
 //  ***********************
@@ -149,3 +199,34 @@ extension RealmFeedStoreTests: FailableRetrieveFeedStoreSpecs {
 		assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
 	}
 }
+
+extension RealmFeedStoreTests: FailableInsertFeedStoreSpecs {
+	
+	func test_insert_deliversErrorOnInsertionError() {
+		let sut = makeSUT()
+		activateRealmTransactionFailureForTestDuration()
+		
+		assertThatInsertDeliversErrorOnInsertionError(on: sut)
+	}
+	
+	func test_insert_hasNoSideEffectsOnInsertionError() {
+//		let sut = makeSUT()
+//
+//		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
+	}
+}
+
+//extension RealmFeedStoreTests: FailableDeleteFeedStoreSpecs {
+//
+//	func test_delete_deliversErrorOnDeletionError() {
+////		let sut = makeSUT()
+////
+////		assertThatDeleteDeliversErrorOnDeletionError(on: sut)
+//	}
+//
+//	func test_delete_hasNoSideEffectsOnDeletionError() {
+////		let sut = makeSUT()
+////
+////		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
+//	}
+//}
