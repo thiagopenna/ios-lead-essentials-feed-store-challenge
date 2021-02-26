@@ -210,9 +210,10 @@ extension RealmFeedStoreTests: FailableInsertFeedStoreSpecs {
 	}
 	
 	func test_insert_hasNoSideEffectsOnInsertionError() {
-//		let sut = makeSUT()
-//
-//		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
+		let sut = makeSUT()
+		activateRealmTransactionFailureForTestDuration()
+
+		assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
 	}
 }
 
