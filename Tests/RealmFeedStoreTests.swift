@@ -232,4 +232,16 @@ extension RealmFeedStoreTests: FailableDeleteFeedStoreSpecs {
 
 		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
 	}
+	
+	func test_delete_hasNoSideEffectsOnDeletionErrorOnNonEmptyCache() {
+		let sut = makeSUT()
+		let feed = uniqueImageFeed()
+		let timestamp = Date()
+		insert((feed, timestamp), to: sut)
+		activateRealmTransactionFailureForTestDuration()
+		
+		assertThatDeleteDeliversErrorOnDeletionError(on: sut)
+		
+		expect(sut, toRetrieve: .found(feed: feed, timestamp: timestamp))
+	}
 }
