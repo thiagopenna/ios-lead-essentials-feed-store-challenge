@@ -227,8 +227,9 @@ extension RealmFeedStoreTests: FailableDeleteFeedStoreSpecs {
 	}
 
 	func test_delete_hasNoSideEffectsOnDeletionError() {
-//		let sut = makeSUT()
-//
-//		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
+		let sut = makeSUT()
+		activateRealmTransactionFailureForTestDuration()
+
+		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
 	}
 }
