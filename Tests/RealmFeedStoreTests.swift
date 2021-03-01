@@ -217,17 +217,18 @@ extension RealmFeedStoreTests: FailableInsertFeedStoreSpecs {
 	}
 }
 
-//extension RealmFeedStoreTests: FailableDeleteFeedStoreSpecs {
+extension RealmFeedStoreTests: FailableDeleteFeedStoreSpecs {
+
+	func test_delete_deliversErrorOnDeletionError() {
+		let sut = makeSUT()
+		activateRealmTransactionFailureForTestDuration()
+
+		assertThatDeleteDeliversErrorOnDeletionError(on: sut)
+	}
+
+	func test_delete_hasNoSideEffectsOnDeletionError() {
+//		let sut = makeSUT()
 //
-//	func test_delete_deliversErrorOnDeletionError() {
-////		let sut = makeSUT()
-////
-////		assertThatDeleteDeliversErrorOnDeletionError(on: sut)
-//	}
-//
-//	func test_delete_hasNoSideEffectsOnDeletionError() {
-////		let sut = makeSUT()
-////
-////		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
-//	}
-//}
+//		assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
+	}
+}
